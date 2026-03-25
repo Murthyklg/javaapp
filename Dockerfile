@@ -8,4 +8,4 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=builder /app/app.class .
 EXPOSE 8080
-CMD ["java", "App"]
+CMD ["java", "app"]
