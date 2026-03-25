@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "murthy4797/javaapp"
+        REGISTRY_CREDENTIALS = "05b6d3ad-dda3-4ba8-ba53-b1f760591a83"
+    }
+   
+    stages {
+
+//checkout stage
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Murthyklg/javaapp.git'
+            }
+        }
+
+//stage where commit id is trimmed till 7 characters and taken for reference
+        stage('Get Commit SHA') {
+            steps {
+                script {
+                    COMMIT_SHA = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+//build docker image with image id as build-build.id-commit.SHA which gives unique docker image everytime a build is triggered
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+//login to dockerhub
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${REGISTRY_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                }
+            }
+        }
+//push docker image to dockerhub
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+ stage('Deploy to Kubernetes (Canary)') {
+    steps {
+         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+        sh 'kubectl get svc'
+    }
+        script {
+            def NEW_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+
+            withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+
+                sh 'kubectl get nodes'   // test connection
+
+                sh """
+                sed 's|REPLACE_STABLE_IMAGE|${NEW_IMAGE}|g' k8s/deployment-stable.yaml > k8s/deployment-stable-final.yaml
+                """
+
+                sh "kubectl apply -f k8s/deployment-stable-final.yaml"
+                sh "kubectl apply -f k8s/deployment-canary-final.yaml"
+                sh "kubectl apply -f k8s/service.yaml"
+            }
+        }
+    }
+}
+
+    }
+
+
+
+//success or failure message
+    post {
+        success {
+            echo "Docker image pushed successfully: ${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+        failure {
+            echo "Pipeline failed!"
+        }
+    }
+}

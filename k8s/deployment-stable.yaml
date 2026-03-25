@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-app-stable
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: javaapp
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: javaapp
+        version: stable
+    spec:
+      containers:
+      - name: javaapp
+        image: REPLACE_STABLE_IMAGE
+        ports:
+        - containerPort: 8080
