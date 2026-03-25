@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "murthy4797/javaapp"
-        REGISTRY_CREDENTIALS = "05b6d3ad-dda3-4ba8-ba53-b1f760591a83"
+        REGISTRY_CREDENTIALS = "github-webhook"
     }
    
     stages {
