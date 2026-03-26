@@ -86,8 +86,6 @@ pipeline {
 
     }
 
-    }
-
 //success or failure message
     post {
         success {
@@ -98,3 +96,5 @@ pipeline {
         }
     }
 }
+}
+    
