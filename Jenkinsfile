@@ -81,6 +81,7 @@ pipeline {
     }
 }
 
+}
     
 
 //success or failure message
@@ -92,6 +93,5 @@ pipeline {
             echo "Pipeline failed!"
         }
     }
-}
 }
 
