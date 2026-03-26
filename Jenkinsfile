@@ -29,10 +29,6 @@ pipeline {
 //build docker image with image id as build-build.id-commit.SHA which gives unique docker image everytime a build is triggered
         stage('Build Docker Image') {
             steps {
-              //  script {
-                //    IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
-               //     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-             //   }
                   script {
             IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
             echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
@@ -66,7 +62,7 @@ pipeline {
         }
             }
         }
- stage('Deploy to Kubernetes (Canary)') {
+ stage('Deploy to Kubernetes') {
     steps {
          withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
         sh 'kubectl get svc'
@@ -85,7 +81,7 @@ pipeline {
     }
 }
 
-    }
+    
 
 //success or failure message
     post {
@@ -98,4 +94,4 @@ pipeline {
     }
 }
 }
-}
+
