@@ -61,10 +61,11 @@ pipeline {
             docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                 dockerImage.push("${IMAGE_TAG}")   // push as build-<number>-<commit>  
                 dockerImage.push('latest')         // also push as :latest 
-                }
+                
             }
         }
-
+            }
+        }
  stage('Deploy to Kubernetes (Canary)') {
     steps {
          withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
