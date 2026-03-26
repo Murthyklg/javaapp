@@ -29,10 +29,15 @@ pipeline {
 //build docker image with image id as build-build.id-commit.SHA which gives unique docker image everytime a build is triggered
         stage('Build Docker Image') {
             steps {
-                script {
-                    IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
+              //  script {
+                //    IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
+               //     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+             //   }
+                  script {
+            IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_SHA}"
+            echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+        }
             }
         }
 //login to dockerhub
@@ -51,7 +56,11 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                   // sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    echo "Pushing Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                dockerImage.push("${IMAGE_TAG}")   // push as build-<number>-<commit>  
+                dockerImage.push('latest')         // also push as :latest 
                 }
             }
         }
