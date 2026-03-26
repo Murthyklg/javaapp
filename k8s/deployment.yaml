@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: javaapp
 spec:
-  replicas: 4
+  replicas: 2
   selector:
     matchLabels:
       app: javaapp
@@ -12,8 +12,11 @@ spec:
       labels:
         app: javaapp
     spec:
+      imagePullSecrets:
+        - name: dockerhub-secret        # ← matches secret created in stage 5
       containers:
-      - name: java-app
-        image: murthy4797/javaapp:latest
-        ports:
-        - containerPort: 8080
+        - name: java-app                # ← must match CONTAINER_NAME in pipeline
+          image: murthy4797/javaapp:IMAGE_TAG   # ← sed replaces this at runtime
+          imagePullPolicy: Always       # ← always pull fresh image
+          ports:
+            - containerPort: 8080
