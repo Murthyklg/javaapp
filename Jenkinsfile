@@ -69,7 +69,7 @@ pipeline {
                 sh 'kubectl get nodes'   // test connection
 
                 sh """
-                sed 's|REPLACE_STABLE_IMAGE|${NEW_IMAGE}|g' k8s/deployment-stable.yaml > k8s/deployment-stable-final.yaml
+                sed 's|REPLACE_STABLE_IMAGE|${NEW_IMAGE}|g' k8s/deployment-stable.yaml > k8s/deployment.yaml
                 """
 
                 sh "kubectl apply -f k8s/deployment.yaml"
